@@ -1,0 +1,5 @@
+flask
+summa
+langdetect
+PyPDF2
+python-docx

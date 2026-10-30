@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>⚡ Smart Text Summarizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #f0f8ff, #e6f0ff);
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #1d2b64, #f8cdda);
+            padding: 40px 0;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        header p {
+            margin: 8px 0 0;
+            font-size: 1em;
+        }
+        .container {
+            max-width: 950px;
+            margin: 40px auto;
+            background: #ffffffdd;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: 600;
+            margin-top: 18px;
+            display: block;
+        }
+        textarea, input[type="email"], input[type="file"], input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        button {
+            background: #6c5ce7;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 25px;
+            transition: background 0.3s ease;
+            width: 100%;
+        }
+        button:hover {
+            background: #5a4dbf;
+        }
+        .flash {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+        .flash.success { background-color: #d0f0c0; color: #27632a; }
+        .flash.error { background-color: #ffcccc; color: #8b0000; }
+        .flash.warning { background-color: #fff3cd; color: #856404; }
+        audio {
+            margin-top: 10px;
+            width: 100%;
+        }
+        .summary-section {
+            background: #f0fbff;
+            border-left: 5px solid #6c5ce7;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 40px;
+        }
+        .summary-section h3 { margin-top: 0; color: #333; }
+        .entity {
+            display: inline-block;
+            background-color: #e0f7fa;
+            color: #006064;
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin: 4px 4px 4px 0;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .entity::after {
+            content: attr(data-label);
+            font-size: 0.7em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #006064;
+            padding: 2px 6px;
+            margin-left: 8px;
+            border-radius: 4px;
+        }
+        output { margin-left: 10px; font-weight: bold; }
+        @media (max-width: 768px) {
+            .container { padding: 25px; }
+            header h1 { font-size: 2em; }
+            button { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>⚡ Smart Text Summarizer</h1>
+        <p>Summarize Anything in Seconds with AI 🤖</p>
+    </header>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="post" enctype="multipart/form-data">
+            <label for="input_text">📝 Enter or paste your text:</label>
+            <textarea name="input_text" id="input_text" rows="8" placeholder="Type or paste a document, paragraph, article..."></textarea>
+
+            <label for="file">📂 Upload a file (.txt / .pdf / .docx):</label>
+            <input type="file" name="file" id="file">
+
+            <label for="email">📧 Your Email (optional):</label>
+            <input type="email" name="email" id="email" placeholder="Enter recipient email" autocomplete="email">
+
+            <label for="summary_ratio">🎯 Summary Length:</label>
+            <input type="range" name="summary_ratio" id="summary_ratio" min="0.1" max="0.5" step="0.1" value="0.2" oninput="this.nextElementSibling.value = this.value">
+            <output>0.2</output>
+
+            <button type="submit">🚀 Generate Summary</button>
+        </form>
+
+        {% if summary %}
+            <div class="summary-section">
+                <h3>📌 AI Generated Title:</h3>
+                <p><strong>{{ summary_title }}</strong></p>
+
+                <h3>📝 Summary:</h3>
+                <p style="white-space: pre-wrap;">{{ summary }}</p>
+
+                {% if audio_path %}
+                    <h4>🔊 Listen to Summary:</h4>
+                    <audio controls src="{{ url_for('static', filename=audio_path.split('/')[-1]) }}"></audio>
+                {% endif %}
+
+                {% if keywords %}
+                    <h4>🔑 Keywords:</h4>
+                    <p>{{ keywords | join(', ') }}</p>
+                {% endif %}
+
+                <div class="section">
+                    <h3>😊 Sentiment</h3>
+                    <p><strong>{{ sentiment }}</strong></p>
+                </div>
+
+                <div class="section">
+                    <h4>Named Entities (NER)</h4>
+                    <ul>
+                        {% for entity in entities %}
+                            <li>{{ entity }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,4 +1,3 @@
-
 # Smart Text Summarizer | NLP-Based Text Summarization
 
 A web-based text-processing application built with Python and Flask. It helps users generate concise summaries from text and PDF documents. It also provides additional features such as language detection, translation, sentiment analysis, text-to-speech, PDF generation, and email notifications.
